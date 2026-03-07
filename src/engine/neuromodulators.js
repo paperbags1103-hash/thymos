@@ -16,16 +16,43 @@ function applyStimulus(state, neuromodName, rawDelta) {
   const delta = hillResponse(rawDelta, nmCfg.EC50, nmCfg.hillN, nmCfg.Emax);
 
   if (neuromodName === 'cortisol') {
-    const delayMs = (15 + Math.random() * 15) * 60 * 1000;
-    state.neuromodulators.cortisol.pending.push({
-      delta,
-      activateAt: Date.now() + delayMs,
-      source: 'hpa_axis',
-    });
+    // Fix #1: 30% 즉시 반영, 70% HPA 지연
+    const immediateFraction = 0.3;
+    const immediateDelta = delta * immediateFraction;
+    const delayedDelta = delta * (1 - immediateFraction);
+
+    // 즉시 반영분
+    const noisyImmediate = addNoise(immediateDelta, config.noiseBaseFraction);
+    state.neuromodulators.cortisol.value = clamp(
+      state.neuromodulators.cortisol.value + noisyImmediate,
+      0,
+      100
+    );
+
+    // 지연분 (15-30분 후)
+    if (Math.abs(delayedDelta) > 0.1) {
+      const delayMs = (15 + Math.random() * 15) * 60 * 1000;
+      state.neuromodulators.cortisol.pending.push({
+        delta: delayedDelta,
+        activateAt: Date.now() + delayMs,
+        source: 'hpa_axis',
+      });
+    }
     return;
   }
 
-  const noisyDelta = addNoise(delta, config.noiseBaseFraction);
+  // Fix #3: 극값 근처에서 반대 방향 delta에 1.5x 부스트
+  let adjustedDelta = delta;
+  const currentVal = state.neuromodulators[neuromodName].value;
+  if (currentVal > 85 && delta < 0) {
+    // 포화 상태에서 하락 → 1.5x 가중
+    adjustedDelta = delta * 1.5;
+  } else if (currentVal < 15 && delta > 0) {
+    // 바닥 상태에서 상승 → 1.5x 가중
+    adjustedDelta = delta * 1.5;
+  }
+
+  const noisyDelta = addNoise(adjustedDelta, config.noiseBaseFraction);
   state.neuromodulators[neuromodName].value = clamp(
     state.neuromodulators[neuromodName].value + noisyDelta,
     0,

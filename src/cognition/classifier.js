@@ -116,7 +116,8 @@ class StimulusClassifier {
       return withDefaults({ valence: 0.6, arousal: 0.2, category: 'praise', intensity: 0.5, social_signal: 'approach' });
     }
     if (negative.test(value)) {
-      return withDefaults({ valence: -0.5, arousal: 0.4, category: 'criticism', intensity: 0.5, social_signal: 'withdraw' });
+      // Fix #2: 비판 intensity 0.5→0.7, valence -0.5→-0.7, arousal 0.4→0.6
+      return withDefaults({ valence: -0.7, arousal: 0.6, category: 'criticism', intensity: 0.7, social_signal: 'withdraw' });
     }
     if (concern.test(value)) {
       return withDefaults({ valence: 0.1, arousal: 0.2, category: 'concern', intensity: 0.4, social_signal: 'approach' });
@@ -151,7 +152,7 @@ function stimulusToNeuromodulators(profile) {
 
   const categoryMods = {
     praise: { dopamine: 10, serotonin: 8, oxytocin: 12 },
-    criticism: { cortisol: 20, serotonin: -10, dopamine: -8 },
+    criticism: { cortisol: 25, serotonin: -15, dopamine: -15, oxytocin: -8, gaba: -5 },
     humor: { dopamine: 8, serotonin: 5, oxytocin: 6, gaba: 5 },
     affection: { oxytocin: 18, serotonin: 8, gaba: 5 },
     encouragement: { dopamine: 12, serotonin: 6 },
