@@ -109,15 +109,19 @@ git clone https://github.com/paperbags1103-hash/thymos
 cd thymos
 npm install
 
-# 2. Run
+# 2. (Optional) Enable proactive messaging — agent speaks first unprompted
+cp config/proactive.template.json config/proactive.json
+# Edit config/proactive.json — add your Discord bot token and channel ID
+
+# 3. Run
 npm start                          # Direct
 pm2 start ecosystem.config.js     # Background via pm2
 
-# 3. Health check
+# 4. Health check
 curl http://localhost:7749/health
 # {"ok":true,"service":"thymos","stage":"infant","moodLabel":"contemplative","uptimeSec":12}
 
-# 4. Current prompt injection
+# 5. Current prompt injection
 curl http://localhost:7749/prompt
 # [Thymos State]
 # Mood: warm (V:+0.82 A:-0.21 D:+0.14 S:+0.31)

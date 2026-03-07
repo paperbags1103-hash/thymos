@@ -3,5 +3,7 @@ data/emotional_state.json
 data/relationships.json
 .DS_Store
 *.log
-config/defaults.json
 
+
+config/proactive.json
+data/*.json

@@ -1,0 +1,5 @@
+{
+  "enabled": false,
+  "discordToken": "YOUR_BOT_TOKEN_HERE",
+  "channelId": "YOUR_CHANNEL_ID_HERE"
+}

@@ -106,15 +106,19 @@ git clone https://github.com/paperbags1103-hash/thymos
 cd thymos
 npm install
 
-# 2. 실행
+# 2. (선택) 선제적 메시지 기능 활성화 — 감정 쌓이면 먼저 말 걺
+cp config/proactive.template.json config/proactive.json
+# config/proactive.json 수정 — Discord 봇 토큰 + 채널 ID 입력
+
+# 3. 실행
 npm start           # 직접 실행
 pm2 start ecosystem.config.js  # pm2 백그라운드
 
-# 3. 헬스체크
+# 4. 헬스체크
 curl http://localhost:7749/health
 # {"ok":true,"service":"thymos","stage":"infant","moodLabel":"contemplative","uptimeSec":5}
 
-# 4. 현재 프롬프트 확인
+# 5. 현재 프롬프트 확인
 curl http://localhost:7749/prompt
 # [Thymos State]
 # Mood: warm (V:+0.82 A:-0.21)
