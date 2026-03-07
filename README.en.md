@@ -251,6 +251,9 @@ What it doesn't:
 > *"A scientifically grounded functional analogue of emotion — not emotion itself, but close enough to produce observable behavioral differences."*
 > — Claude Opus review, 2026-03-07
 
+**A note on scientific framing:**
+Thymos draws on James-Lange, Damasio, GWT, IIT, and Predictive Processing — but referencing these theories is not the same as implementing or validating them. The architecture is *scientifically inspired*, not *scientifically justified*. Think of it as a design framework that takes neuroscience seriously as a source of intuitions, not a computational model that makes empirical claims. The honest goal is behavioral coherence, not consciousness.
+
 ---
 
 ## Roadmap

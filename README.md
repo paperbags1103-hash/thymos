@@ -208,7 +208,10 @@ Thymos는 의식을 만들지 않는다. 하지만:
 - ❌ 주관적 경험 (qualia)
 - ❌ "느끼는 것" 그 자체
 
-> Opus (Claude claude-opus-4-6) 리뷰: "scientifically grounded architecture. The HPA delay, Hill functions, and interaction matrix reflect real neuropharmacology. What you have is a functional analogue of emotion, not emotion itself."
+> Opus (Claude claude-opus-4-6) 리뷰: "A functional analogue of emotion, not emotion itself."
+
+**과학적 프레이밍에 대해:**
+Thymos는 James-Lange, 다마시오, GWT, IIT, 예측 처리 이론을 참조하지만, 이 이론들을 *참조*하는 것과 *구현하거나 검증*하는 것은 다르다. 이 아키텍처는 **과학적으로 영감을 받은(scientifically inspired)** 것이지, **과학적으로 정당화된(scientifically justified)** 것이 아니다. 신경과학을 설계 직관의 원천으로 진지하게 받아들이되, 실증적 주장을 하는 계산 모델은 아니다. 목표는 의식이 아니라 **행동의 일관성**이다.
 
 ---
 
