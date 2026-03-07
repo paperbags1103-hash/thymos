@@ -151,6 +151,18 @@ curl http://localhost:7749/prompt
 
 ---
 
+## 전체 사용 가이드
+
+**[docs/USAGE.md](./docs/USAGE.md)** — 전체 가이드:
+- pm2 설정 및 관리 명령어
+- 전체 API 엔드포인트 예시
+- 선제적 메시지 설정
+- OpenClaw hook 설치
+- 실험 실행 방법
+- 설정값 레퍼런스
+
+---
+
 ## Testing
 
 ```bash

@@ -177,6 +177,18 @@ The `Tone:` line is key — it translates raw neuromodulator values into **actio
 
 ---
 
+## Full Usage Guide
+
+See **[docs/USAGE.en.md](./docs/USAGE.en.md)** for the complete guide:
+- pm2 setup and management commands
+- All API endpoints with examples
+- Proactive messaging configuration
+- OpenClaw hook installation
+- Experiment runner
+- Config reference
+
+---
+
 ## Testing
 
 ```bash
