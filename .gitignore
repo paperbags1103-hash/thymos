@@ -1,0 +1,5 @@
+node_modules/
+data/emotional_state.json
+data/relationships.json
+.DS_Store
+*.log
