@@ -31,6 +31,7 @@ const { RelationshipMemory } = require('./memory/relationships');
 
 const { SocialModel } = require('./social/model');
 const { DevelopmentStage } = require('./social/development');
+const { ProactiveMessenger } = require('./proactive');
 
 class ThymosDaemon {
   constructor() {
@@ -41,6 +42,14 @@ class ThymosDaemon {
     this.server = null;
     this.tickTimer = null;
     this.startedAt = Date.now();
+
+    // Proactive messaging — speaks first when emotion builds up
+    this.proactive = config.proactive?.enabled
+      ? new ProactiveMessenger({
+          discordToken: config.proactive.discordToken,
+          channelId: config.proactive.channelId,
+        })
+      : null;
 
     // Fix #1: Mutex to prevent tick/processStimulus race condition
     this._processing = false;
@@ -237,6 +246,12 @@ class ThymosDaemon {
     this.state.prompt_injection = generatePromptInjection(this.state, this.socialModel);
 
     await atomicWriteState(this.state, config.paths.stateFile);
+
+    // Proactive: check if emotional state warrants speaking first
+    if (this.proactive) {
+      this.proactive.evaluate(this.state).catch(() => {});
+    }
+
     return this.state;
   }
 
