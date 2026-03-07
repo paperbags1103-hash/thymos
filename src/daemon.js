@@ -42,6 +42,10 @@ class ThymosDaemon {
     this.tickTimer = null;
     this.startedAt = Date.now();
 
+    // Fix #1: Mutex to prevent tick/processStimulus race condition
+    this._processing = false;
+    this._pendingStimuli = [];
+
     this.momentum = new EmotionalMomentum();
 
     this.classifier = null;
@@ -121,6 +125,22 @@ class ThymosDaemon {
   }
 
   async tick() {
+    // Fix #1: Mutex — skip tick if already processing a stimulus
+    if (this._processing) return this.state;
+    this._processing = true;
+    try {
+      return await this._tickImpl();
+    } finally {
+      this._processing = false;
+      // Drain any queued stimuli after tick completes
+      if (this._pendingStimuli.length > 0) {
+        const next = this._pendingStimuli.shift();
+        this._processStimulusImpl(next).catch(err => console.error('Queued stimulus error:', err));
+      }
+    }
+  }
+
+  async _tickImpl() {
     if (!this.state) {
       this.state = createInitialState();
       this._initSubsystems();
@@ -221,6 +241,27 @@ class ThymosDaemon {
   }
 
   async processStimulus(stimulus) {
+    // Fix #1: Queue stimulus if tick is running; drain after tick finishes
+    if (this._processing) {
+      return new Promise((resolve) => {
+        this._pendingStimuli.push({ stimulus, resolve });
+      });
+    }
+    this._processing = true;
+    try {
+      return await this._processStimulusImpl(stimulus);
+    } finally {
+      this._processing = false;
+    }
+  }
+
+  async _processStimulusImpl(stimulus) {
+    if (typeof stimulus?.resolve === 'function') {
+      const { stimulus: s, resolve } = stimulus;
+      const result = await this._processStimulusImpl(s);
+      resolve(result);
+      return result;
+    }
     const normalized = this._normalizeStimulus(stimulus);
 
     let profile = this.classifier.classify(normalized);

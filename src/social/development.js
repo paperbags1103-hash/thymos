@@ -8,7 +8,8 @@ class DevelopmentStage {
     const days = (Date.now() - this.createdAt) / (24 * 60 * 60 * 1000);
     const interactions = this.totalInteractions;
 
-    if (days < 3 || interactions < 50) {
+    // Fix #3: OR → AND (둘 다 충족해야 다음 단계로)
+    if (days < 3 && interactions < 50) {
       return {
         name: 'infant',
         label: '유아기',
@@ -18,7 +19,7 @@ class DevelopmentStage {
       };
     }
 
-    if (days < 14 || interactions < 300) {
+    if (days < 14 && interactions < 300) {
       return {
         name: 'child',
         label: '아동기',
@@ -28,7 +29,7 @@ class DevelopmentStage {
       };
     }
 
-    if (days < 60 || interactions < 1500) {
+    if (days < 60 && interactions < 1500) {
       return {
         name: 'adolescent',
         label: '청소년기',

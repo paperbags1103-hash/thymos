@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const config = require('../utils/config');
 const { clamp } = require('../utils/math');
 
@@ -72,8 +74,16 @@ class RelationshipMemory {
   }
 
   _persist() {
+    // Fix #4: 원자적 쓰기 (tmp + rename) — 크래시 시 파일 손상 방지
     const payload = JSON.stringify({ relationships: this.relationships }, null, 2);
-    fs.writeFileSync(this.filePath, payload, 'utf8');
+    const tmpPath = path.join(os.tmpdir(), `thymos-rel-${process.pid}-${Date.now()}.tmp`);
+    try {
+      fs.writeFileSync(tmpPath, payload, 'utf8');
+      fs.renameSync(tmpPath, this.filePath);
+    } catch (err) {
+      try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
+      console.error('[RelationshipMemory] persist failed:', err.message);
+    }
   }
 }
 

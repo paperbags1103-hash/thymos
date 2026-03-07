@@ -29,14 +29,17 @@ function applyStimulus(state, neuromodName, rawDelta) {
       100
     );
 
-    // 지연분 (15-30분 후)
+    // 지연분 (15-30분 후) — Fix #2: 상한 50개 제한
     if (Math.abs(delayedDelta) > 0.1) {
-      const delayMs = (15 + Math.random() * 15) * 60 * 1000;
-      state.neuromodulators.cortisol.pending.push({
-        delta: delayedDelta,
-        activateAt: Date.now() + delayMs,
-        source: 'hpa_axis',
-      });
+      const pending = state.neuromodulators.cortisol.pending;
+      if (pending.length < 50) {
+        const delayMs = (15 + Math.random() * 15) * 60 * 1000;
+        pending.push({
+          delta: delayedDelta,
+          activateAt: Date.now() + delayMs,
+          source: 'hpa_axis',
+        });
+      }
     }
     return;
   }
