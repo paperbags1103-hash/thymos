@@ -93,14 +93,15 @@ class StimulusClassifier {
   fallbackKeywordClassify(text) {
     const value = String(text || '');
 
-    const humor = /ㅋㅋㅋ|ㅎㅎㅎ|웃기|장난|🤣|😂/i;
-    const positive = /칭찬|잘했|고마|좋아|대단|멋지|최고|사랑|ㅋㅋ|ㅎㅎ|👍|❤️|😊/i;
-    const negative = /비판|왜그래|별로|실망|짜증|못해|이상해|화나|😡|😤/i;
-    const encouragement = /응원|할 수 있|힘내|파이팅|괜찮아/i;
-    const affection = /사랑해|보고싶|안아|고생했|수고했/i;
-    const concern = /괜찮아\?|무슨 일|걱정|아프|힘들/i;
-    const question = /\?|왜|어떻게|뭐야|무엇|언제|어디/i;
-    const command = /해줘|해라|지금|빨리|당장|반드시|해야/i;
+    // Multilingual keyword patterns (KO/EN/JA/ZH/ES)
+    const humor = /ㅋㅋㅋ|ㅎㅎㅎ|웃기|장난|lol|lmao|rofl|haha|funny|hilarious|笑|草|ワロタ|jaja|🤣|😂/i;
+    const positive = /칭찬|잘했|고마|좋아|대단|멋지|최고|사랑|ㅋㅋ|ㅎㅎ|great|good\s?job|awesome|nice|excellent|amazing|fantastic|wonderful|well\s?done|perfect|brilliant|thank|love|すごい|素晴らしい|ありがとう|太好了|厉害|谢谢|棒|genial|increíble|gracias|👍|❤️|😊|🎉|💪|🙌/i;
+    const negative = /비판|왜그래|별로|실망|짜증|못해|이상해|화나|bad|terrible|awful|wrong|horrible|disappointed|annoying|stupid|worst|sucks|hate|ugly|ダメ|ひどい|最悪|失望|糟糕|差劲|讨厌|terrible|malo|😡|😤|👎/i;
+    const encouragement = /응원|할 수 있|힘내|파이팅|괜찮아|you can|keep going|don't give up|believe|go for it|頑張|加油|ánimo/i;
+    const affection = /사랑해|보고싶|안아|고생했|수고했|love you|miss you|proud of you|care about|大好き|爱你|想你|te quiero/i;
+    const concern = /괜찮아\?|무슨 일|걱정|아프|힘들|are you ok|you alright|what happened|worried|大丈夫|没事吧|estás bien/i;
+    const question = /\?|왜|어떻게|뭐야|무엇|언제|어디|why|how|what|when|where|who|なぜ|什么|为什么|por qué|cómo/i;
+    const command = /해줘|해라|지금|빨리|당장|반드시|해야|do it|right now|immediately|hurry|must|asap|すぐ|马上|hazlo|ahora/i;
 
     if (humor.test(value)) {
       return withDefaults({ valence: 0.4, arousal: 0.3, category: 'humor', intensity: 0.4, social_signal: 'approach' });
