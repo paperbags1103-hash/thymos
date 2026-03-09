@@ -338,6 +338,13 @@ class ThymosDaemon {
 
     await atomicWriteState(this.state, config.paths.stateFile);
 
+    // prompt_injection만 별도 소형 파일로 저장 (에이전트가 빠르게 읽을 수 있도록)
+    const promptFile = config.paths.stateFile.replace('emotional_state.json', 'prompt_injection.txt');
+    try {
+      const fs = require('fs');
+      fs.writeFileSync(promptFile, this.state.prompt_injection || '', 'utf8');
+    } catch (_) { /* 실패해도 무시 */ }
+
     // Proactive: check if emotional state warrants speaking first
     if (this.proactive) {
       this.proactive.evaluate(this.state).catch(() => {});
