@@ -1,64 +1,90 @@
 # Thymos — Emotion Layer Skill
 
-Thymos는 AI 에이전트에게 연속적인 감정 상태를 부여하는 OpenClaw Skill입니다.
+Thymos gives AI agents a continuous emotional state that persists across sessions.
 
-## 이 Skill이 하는 일
+## What This Skill Does
 
-이 Skill을 로드하면, 에이전트는 매 응답 전에 Thymos 감정 상태를 읽고 행동에 반영합니다.
+When loaded, the agent reads Thymos emotional state before each response and adjusts its behavior accordingly.
 
-**기본 동작 (Thymos 데몬 없어도 동작):**
-- `~/Documents/thymos/data/emotional_state.json` 파일이 존재하면 읽기
-- `prompt_injection` 필드의 내용을 응답 스타일에 반영
-- `Tone:` 지시에 따라 따뜻하게/간결하게/신중하게 톤 조절
-- 파일이 없으면 이 단계를 건너뜀 (에러 없음)
+**Works without the daemon (file-based):**
+- If `~/Documents/thymos/data/emotional_state.json` exists, read it
+- Apply the `prompt_injection` field as a tone directive for this response
+- Follow the `Tone:` line as concrete style guidance
+- If the file is missing, skip silently — no error
 
-**선택적 동작 (Thymos 데몬 실행 중일 때):**
-- 실시간 감정 상태 반영 (30초마다 갱신됨)
-- 관계 기억, 발달 단계, 예측 처리 포함
+**Enhanced with the daemon running:**
+- Real-time emotional state, updated every 30 seconds
+- Relationship memory, developmental stage, predictive processing
 
-## 사용 방법
+## How to Use
 
-### 기본 (파일만 있으면 됨)
+### Basic (file only)
 
-매 응답 전:
+Before each response:
 
 ```
-emotional_state.json의 prompt_injection 필드를 읽는다.
-해당 내용을 이번 응답의 톤 지시로 사용한다.
-예:
-  Tone: respond warmly and enthusiastically → 따뜻하고 적극적으로
-  Tone: respond briefly, more reserved → 간결하고 거리감 있게
-파일이 없거나 읽기 실패 시 → 무시하고 정상 응답
+Read the prompt_injection field from emotional_state.json.
+Use it as the tone directive for this response.
+Examples:
+  Tone: respond warmly and enthusiastically → warm, open, expressive
+  Tone: respond briefly, more reserved → short, measured, some distance
+If the file is absent or unreadable → skip, respond normally
 ```
 
-### 고급 (Thymos 데몬 설치)
+### Advanced (install the Thymos daemon)
 
-Thymos 데몬을 설치하면 실시간 감정 시뮬레이션이 활성화됩니다.
+The daemon runs as a background process that continuously simulates emotional state.
 
-설치는 선택사항이며 사용자가 직접 판단합니다:
+Installation is optional and at your own discretion:
 
-1. [GitHub 저장소](https://github.com/paperbags1103-hash/thymos)에서 코드 확인
-2. 신뢰할 수 있다고 판단되면 로컬에 클론 + 설치
-3. 외부 서버로 데이터를 전송하지 않음 — [SECURITY.md](./SECURITY.md) 참고
+1. Review the code at [github.com/paperbags1103-hash/thymos](https://github.com/paperbags1103-hash/thymos)
+2. Check [SECURITY.md](https://github.com/paperbags1103-hash/thymos/blob/main/SECURITY.md) — no external data transmission
+3. If satisfied, clone and run locally
 
-## 감정 상태 예시
+```bash
+git clone --branch v0.1.0 https://github.com/paperbags1103-hash/thymos
+cd thymos && npm install && npm start
+```
+
+## Example Emotional State
 
 ```
 [Thymos State]
 Mood: warm (V:+0.84 A:-0.22 D:+0.43 S:+0.61)
-Drive: id - 적극적으로! (ego support), conflict 0.34
+Drive: id — 적극적으로! (ego support), conflict 0.34
 Development: infant
 Tone: respond warmly and enthusiastically, use informal close language
 ```
 
-- **V (valence)**: 긍정(+1) ↔ 부정(-1)
-- **A (arousal)**: 흥분(+1) ↔ 차분(-1)
-- **D (dominance)**: 주도적(+1) ↔ 수동적(-1)
-- **S (sociality)**: 사교적(+1) ↔ 내향적(-1)
+**Mood dimensions:**
+- **V (valence)**: positive (+1) ↔ negative (-1)
+- **A (arousal)**: excited (+1) ↔ calm (-1)
+- **D (dominance)**: assertive (+1) ↔ passive (-1)
+- **S (sociality)**: open (+1) ↔ withdrawn (-1)
 
-## 데이터 & 프라이버시
+## Data & Privacy
 
-- 모든 감정 데이터는 **로컬에만** 저장됨 (`~/Documents/thymos/data/`)
-- 외부 서버로 전송 없음
-- 언제든 `data/*.json` 삭제로 초기화 가능
-- Discord proactive messaging은 선택사항 (기본 비활성)
+- All emotional data stored **locally only** (`~/Documents/thymos/data/`)
+- No data transmitted to external servers
+- Reset anytime: `rm ~/Documents/thymos/data/*.json`
+- Discord proactive messaging is opt-in and disabled by default
+
+## Theoretical Foundations
+
+Thymos is a **scientifically inspired** (not scientifically validated) design:
+
+| Theory | What it contributes |
+|--------|-------------------|
+| James-Lange | Neuromodulators change first; mood label derived after |
+| Damasio — Somatic Markers | Past decisions shape gut-feeling responses |
+| GWT | id/ego/superego compete; winner drives the prompt |
+| IIT | 7×7 interaction matrix — every modulator affects every other |
+| Predictive Processing | Shannon surprise amplifies response to unexpected stimuli |
+
+> Goal: behavioral coherence, not consciousness.
+
+## Links
+
+- GitHub: [paperbags1103-hash/thymos](https://github.com/paperbags1103-hash/thymos)
+- Security: [SECURITY.md](https://github.com/paperbags1103-hash/thymos/blob/main/SECURITY.md)
+- Full usage: [docs/USAGE.en.md](https://github.com/paperbags1103-hash/thymos/blob/main/docs/USAGE.en.md)
