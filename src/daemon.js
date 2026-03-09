@@ -20,8 +20,7 @@ const { attentionGate } = require('./cognition/attention');
 const { MetacognitionLayer } = require('./cognition/metacognition');
 const { RetrospectionEngine } = require('./cognition/retrospection');
 
-const { InternalAgents } = require('./agents/internal');
-const { globalWorkspaceCompetition } = require('./agents/gwt');
+// v1 GWT removed — replaced by IgnitionEngine (v2)
 
 const { SelfFeedbackLoop } = require('./feedback/self-loop');
 
@@ -64,6 +63,7 @@ class ThymosDaemon {
     // Fix #1: Mutex to prevent tick/processStimulus race condition
     this._processing = false;
     this._pendingStimuli = [];
+    this._lastTickAt = Date.now();
 
     this.momentum = new EmotionalMomentum();
 
@@ -72,7 +72,6 @@ class ThymosDaemon {
     this.retrospection = null;
     this.devStage = null;
     this.metacognition = null;
-    this.internalAgents = null;
     this.selfFeedback = null;
     this.emotionalMemory = null;
     this.somaticMarkers = null;
@@ -129,7 +128,6 @@ class ThymosDaemon {
     this.retrospection = new RetrospectionEngine(config.retrospectionInterval);
     this.devStage = new DevelopmentStage(this.state);
     this.metacognition = new MetacognitionLayer(this.devStage);
-    this.internalAgents = new InternalAgents();
     this.selfFeedback = new SelfFeedbackLoop(this.classifier);
     this.emotionalMemory = new EmotionalMemorySystem();
     this.somaticMarkers = new SomaticMarkerSystem(this.emotionalMemory);
@@ -152,15 +150,25 @@ class ThymosDaemon {
       this.retrospection.lastRetrospection = Date.now();
     }
 
-    // v2 서브시스템 초기화
+    // v2 서브시스템 초기화 + 저장된 상태 복원
     this.ignition = new IgnitionEngine();
     this.userModels = new UserModelManager();
     this.homeostasis = new ActiveHomeostasis();
     this.narrative = new NarrativeSelf();
+
     this.realtimeMeta = new RealtimeMeta();
     this.energy = new EnergySystem();
     this.attention = new AttentionalResources();
     this.phiCalc = new PhiApproximator();
+
+    // v2 상태 복원
+    if (this.state._v2narrative) {
+      Object.assign(this.narrative.selfConcept, this.state._v2narrative.selfConcept || {});
+      this.narrative.story = this.state._v2narrative.story || [];
+    }
+    if (typeof this.state._v2energy === 'number') {
+      this.energy.energy = this.state._v2energy;
+    }
   }
 
   async tick() {
@@ -202,7 +210,9 @@ class ThymosDaemon {
       effectiveBaselines[name] = getEffectiveBaseline(cfg, circadianMods[name], relationBonus, retroMod);
     }
 
-    const elapsedMin = config.tickInterval / 60000;
+    // Fix 2: 실제 경과 시간 사용 (tick이 늦게 실행돼도 정확한 decay)
+    const elapsedMin = Math.min((now - this._lastTickAt) / 60000, 5); // 최대 5분 상한
+    this._lastTickAt = now;
     decayAll(this.state, elapsedMin, effectiveBaselines);
     applyInteractions(this.state, config.tickIntervalSec);
 
@@ -210,24 +220,15 @@ class ThymosDaemon {
     const prevVector = this.state.mood?.vector || this.state.moodVector || rawVector;
     const momentumVector = this.momentum.apply(rawVector, prevVector);
 
-    const idResp = this.internalAgents.generateIdResponse(this.state.neuromodulators, null);
-    const egoResp = this.internalAgents.generateEgoResponse(this.state.neuromodulators, null, {
-      isUrgent: false,
-      isComplex: false,
-    });
-    const superegoResp = this.internalAgents.generateSuperegoResponse(this.state.neuromodulators, null);
-    // v1 broadcast (하위 호환)
-    const broadcastV1 = globalWorkspaceCompetition(idResp, egoResp, superegoResp, this.devStage);
-
     // v2: IgnitionEngine — 방송 NM boost 적용 후 경쟁
     const nmBoosts = this.ignition.getBroadcastNMBoosts();
     if (Object.keys(nmBoosts).length > 0) {
       for (const [nm, boost] of Object.entries(nmBoosts)) {
-        applyStimulus(this.state, nm, boost * 0.1); // 부드럽게 적용
+        applyStimulus(this.state, nm, boost * 0.1);
       }
       this.ignition.clearBroadcastNMBoosts();
     }
-    // disruption factor (실시간 메타인지)
+    // disruption factor (패턴 고착 탈출)
     const disruptFactor = this.realtimeMeta ? this.realtimeMeta.getDisruptionFactor() : 1.0;
     if (disruptFactor > 1.0) {
       for (const nm of Object.keys(this.state.neuromodulators)) {
@@ -236,9 +237,6 @@ class ThymosDaemon {
       }
     }
     const broadcast = this.ignition.compete(this.state.neuromodulators, this.devStage);
-    // primary/secondary를 v1 호환 포맷으로도 유지
-    if (!broadcast.primary) broadcast.primary = broadcastV1.primary || broadcastV1;
-    if (!broadcast.secondary) broadcast.secondary = broadcastV1.secondary || null;
 
     const metaResult = this.metacognition.regulate(momentumVector, broadcast, {
       inConversation: this._isInConversation(),
@@ -254,9 +252,11 @@ class ThymosDaemon {
 
     this.emotionalMemory.decayMemories();
 
-    // v2: 에너지 틱
+    // v2: 에너지 틱 (activity는 _processStimulusImpl에서 설정)
     const conflictLevel = Number(broadcast.conflict ?? 0);
-    this.energy.tick('idle', conflictLevel, elapsedMin);
+    const activity = this.energy._pendingActivity || 'idle';
+    this.energy._pendingActivity = null;
+    this.energy.tick(activity, conflictLevel, elapsedMin);
     const energyNMEffect = this.energy.getNMEffect();
     for (const [nm, delta] of Object.entries(energyNMEffect)) {
       applyStimulus(this.state, nm, delta * elapsedMin);
@@ -317,15 +317,22 @@ class ThymosDaemon {
     this.state.somaticMarkers = this.somaticMarkers.decisionOutcomes;
     this.state.socialModel = this.socialModel.models;
     this.state.relationships = this.relationshipMemory.relationships;
-    this.state.retrospectionLog = this.retrospection.trajectoryLog;
+    // Fix 5: state 파일에는 최근 100개만 저장 (메모리는 240개 유지)
+    this.state.retrospectionLog = this.retrospection.trajectoryLog.slice(-100);
 
-    // v2 필드
+    // v2 필드 (표시용)
     this.state.phi = phi;
     this.state.energy = this.energy.toState();
     this.state.narrative = this.narrative.toState();
     this.state.homeostasisDrives = this.homeostasis.drives;
     this.state.attentionState = this.attention.toState();
     this.state.ignited = broadcast.ignited || false;
+    // v2 영구저장 (재시작 시 복원용)
+    this.state._v2energy = this.energy.energy;
+    this.state._v2narrative = {
+      selfConcept: this.narrative.selfConcept,
+      story: this.narrative.story,
+    };
 
     this.state.prompt_injection = generatePromptInjection(this.state, this.socialModel);
 
@@ -406,12 +413,12 @@ class ThymosDaemon {
     this.state.totalInteractions = this.devStage.totalInteractions;
     this.state.lastStimulusAt = Date.now();
 
-    // v2: UserModel + Energy
+    // v2: UserModel + Energy (pending activity — consumed on next tick)
     if (this.userModels && normalized.author) {
       this.userModels.update(profile, normalized.author, Date.now());
     }
     if (this.energy) {
-      this.energy.recordActivity('responding');
+      this.energy._pendingActivity = 'responding';
     }
 
     this.state.prediction = {

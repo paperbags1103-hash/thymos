@@ -44,12 +44,6 @@ class EnergySystem {
     return this.energy;
   }
 
-  recordActivity(activity) {
-    this.lastActivity = activity;
-    const consume = CONSUME_RATES[activity] || CONSUME_RATES.idle;
-    this.energy = Math.max(0, this.energy - consume);
-  }
-
   /**
    * 에너지가 NM에 미치는 영향
    */
