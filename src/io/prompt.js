@@ -23,10 +23,10 @@ function generatePromptInjection(state, socialModel) {
   const uncertainty = Number(state.prediction?.uncertaintyLevel ?? 0.5);
 
   const lines = [];
-  lines.push('[Thymos State]');
-  lines.push(`Mood: ${label} (V:${signed(vec.valence)} A:${signed(vec.arousal)} D:${signed(vec.dominance)} S:${signed(vec.sociality)})`);
-  lines.push(`Drive: ${drive}${secondaryText}, conflict ${conflict.toFixed(2)}`);
-  lines.push(`Development: ${stageName}`);
+  lines.push('[Inner State]');
+  lines.push(`Feeling: ${label} (V:${signed(vec.valence)} A:${signed(vec.arousal)} D:${signed(vec.dominance)} S:${signed(vec.sociality)})`);
+  lines.push(`Impulse: ${drive}${secondaryText}, tension ${conflict.toFixed(2)}`);
+  lines.push(`Growth: ${stageName}`);
 
   if (Array.isArray(awareness) && awareness.length > 0) {
     lines.push(`Self-awareness: ${awareness.join('; ')}`);
@@ -37,7 +37,7 @@ function generatePromptInjection(state, socialModel) {
     lines.push(socialText);
   }
 
-  lines.push(`Prediction: uncertainty ${uncertainty.toFixed(2)}`);
+  lines.push(`Uncertainty: ${uncertainty.toFixed(2)}`);
 
   // v2: 내러티브 자아
   const selfConcept = state.narrative?.selfConcept;
@@ -63,10 +63,10 @@ function generatePromptInjection(state, socialModel) {
   const homeoAction = state.homeostasisDrives ? _getHomeostaticHint(state.homeostasisDrives) : '';
   if (homeoAction) lines.push(`Internal drive: ${homeoAction}`);
 
-  // v2: 점화 여부
+  // v2: 점화 여부 (기술 용어 숨김)
   const ignited = state.ignited;
   if (ignited && state.gwt?.winner) {
-    lines.push(`Ignition: ${state.gwt.winner} module fired — respond with emotional intensity`);
+    lines.push(`Intensity: heightened — this moment calls for full presence`);
   }
 
   // Fix #5: 행동 지침 — 감정 상태에 따른 구체적 응답 스타일 안내
