@@ -41,8 +41,9 @@ npm install -g pm2
 # cwd: '/Users/yourname/Documents/thymos'
 
 pm2 start ecosystem.config.js
-pm2 save              # Persist across reboots
-pm2 startup           # (Optional) Auto-start pm2 on boot
+pm2 save              # Persist process list (optional)
+# pm2 startup        # Optional: auto-start on system boot
+                     # Run manually only if you want this behavior
 ```
 
 ### pm2 Commands

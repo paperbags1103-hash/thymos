@@ -41,8 +41,9 @@ npm install -g pm2
 # cwd: '/Users/yourname/Documents/thymos'
 
 pm2 start ecosystem.config.js
-pm2 save                  # 재부팅 후 자동 시작 등록
-pm2 startup               # (선택) 시스템 부팅 시 pm2 자동 시작
+pm2 save                  # 프로세스 목록 저장 (선택)
+# pm2 startup            # (선택) 시스템 부팅 시 자동 시작
+                          # 원할 경우에만 직접 실행
 ```
 
 ### pm2 관리 명령어

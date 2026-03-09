@@ -1,9 +1,12 @@
+// Update cwd to your actual Thymos directory before running.
+// autorestart: true means pm2 will restart Thymos if it crashes.
+// This does NOT add Thymos to system startup; run `pm2 startup` separately if desired.
 module.exports = {
   apps: [
     {
       name: 'thymos',
       script: './src/daemon.js',
-      cwd: '/Users/superdog/Documents/thymos',
+      cwd: '/path/to/thymos', // <-- update this to your actual path
       instances: 1,
       autorestart: true,
       watch: false,
