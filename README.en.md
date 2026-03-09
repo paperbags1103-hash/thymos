@@ -104,9 +104,12 @@ thymos/
 ## Quick Start
 
 ```bash
-# 1. Install
-git clone https://github.com/paperbags1103-hash/thymos
+# 1. Install (pinned to a release tag — recommended)
+git clone --branch v0.1.0 https://github.com/paperbags1103-hash/thymos
 cd thymos
+
+# Before running: review package.json and config/defaults.json for any network calls
+# All dependencies are listed in package.json; no postinstall scripts
 npm install
 
 # 2. (Optional) Enable proactive messaging — agent speaks first unprompted

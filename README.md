@@ -101,9 +101,12 @@ thymos/
 ## Quick Start
 
 ```bash
-# 1. 설치
-git clone https://github.com/paperbags1103-hash/thymos
+# 1. 설치 (릴리즈 태그 고정 권장)
+git clone --branch v0.1.0 https://github.com/paperbags1103-hash/thymos
 cd thymos
+
+# 실행 전: package.json과 config/defaults.json에 외부 네트워크 호출 없음 확인 가능
+# postinstall 스크립트 없음
 npm install
 
 # 2. (선택) 선제적 메시지 기능 활성화 — 감정 쌓이면 먼저 말 걺
